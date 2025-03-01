@@ -112,11 +112,6 @@
         <a href="{{ url_for('select_quiz') }}">
             <button class="button">Start Quiz</button>
         </a>
-	{% if session['user_id'] %}
-        <a href="{{ url_for('profile') }}">
-            <button class="button">Profile</button>
-        </a>
-        {% endif %}
     </div>
 </body>
 </html>

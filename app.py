@@ -20,6 +20,7 @@ def connect_db():
 def home():
     return render_template('login.html')
 
+
 # ---------------- USER AUTHENTICATION ----------------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -62,7 +63,7 @@ def logout():
 def profile():
     if 'user_id' not in session:
         return redirect(url_for('user_login'))
-    return render_template('profile_registration.html', name=session['name'])
+    return render_template('profile_regestration.html', name=session['name'])
 
 # ---------------- ADMIN AUTHENTICATION ----------------
 ADMIN_ID = "GauravKumar@123"
@@ -411,4 +412,4 @@ def user_details():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000)) # Get port from environment variable or default to 5000
-    app.run(host='0.0.0.0', port=port, debug=False)  # Listen on all public IPs (0.0.0.0)
+    app.run( debug=True)  # Listen on all public IPs (0.0.0.0)
