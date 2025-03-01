@@ -569,4 +569,4 @@ def get_chapter_id(chapter_name):
         conn.close()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
