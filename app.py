@@ -1,9 +1,14 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import sqlite3
 import secrets
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(32)
+
+# Load secret key from environment variable for security
+app.secret_key = os.environ.get("FLASK_SECRET_KEY") or secrets.token_hex(32)  # Fallback for local testing
+
+# Database configuration
 DB_NAME = "quiz_app.db"
 
 def connect_db():
@@ -317,4 +322,5 @@ def show_result():
     return render_template('result.html', correct_answers=correct_answers, total_questions=total_questions)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000)) # Get port from environment variable or default to 5000
+    app.run(host='0.0.0.0', port=port, debug=False)  # Listen on all public IPs (0.0.0.0)
