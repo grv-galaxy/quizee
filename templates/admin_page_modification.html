@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Important for width */
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <p>Total Exams: {{ total_exams }}</p>
+    <p>Total Subjects: {{ total_subjects }}</p>
+    <p>Total Chapters: {{ total_chapters }}</p>
+    <p>Total Questions: {{ total_questions }}</p>
+
+    <h2>Modify Database</h2>
+
+    <!-- Add Exam -->
+    <form method="POST" action="/add_exam">
+        <h3>Add Exam</h3>
+        <label for="exam_name">Exam Name:</label>
+        <input type="text" id="exam_name" name="exam_name" required><br><br>
+        <button type="submit">Add Exam</button>
+    </form>
+
+    <h3>Available Exams</h3>
+    <ul>
+        {% for exam in exams %}
+            <li>{{ exam[1] }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Add Subject -->
+    <form method="POST" action="/add_subject">
+        <h3>Add Subject</h3>
+        <label for="exam_id">Select Exam:</label>
+        <select id="exam_id" name="exam_id" required>
+            {% for exam in exams %}
+                <option value="{{ exam[0] }}">{{ exam[1] }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="subject_name">Subject Name:</label>
+        <input type="text" id="subject_name" name="subject_name" required><br><br>
+        <button type="submit">Add Subject</button>
+    </form>
+
+    <h3>Available Subjects</h3>
+    <ul>
+        {% for subject in subjects %}
+            <li>{{ subject[1] }} (Exam: {{ subject[2] }})</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Add Chapter -->
+    <form method="POST" action="/add_chapter">
+        <h3>Add Chapter</h3>
+        <label for="subject_id">Select Subject:</label>
+        <select id="subject_id" name="subject_id" required>
+            {% for subject in subjects %}
+                <option value="{{ subject[0] }}">{{ subject[1] }} (Exam: {{ subject[2] }})</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="chapter_name">Chapter Name:</label>
+        <input type="text" id="chapter_name" name="chapter_name" required><br><br>
+        <button type="submit">Add Chapter</button>
+    </form>
+
+    <h3>Available Chapters</h3>
+    <ul>
+        {% for chapter in chapters %}
+            <li>{{ chapter[1] }} (Subject: {{ chapter[2] }})</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Add Question -->
+    <form method="POST" action="/add_question">
+        <h3>Add Question</h3>
+        <label for="chapter_id_question">Select Chapter:</label>
+        <select id="chapter_id_question" name="chapter_id_question" required>
+            {% for chapter in chapters %}
+                <option value="{{ chapter[0] }}">{{ chapter[1] }} (Subject: {{ chapter[2] }})</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="question_text">Question Text:</label>
+        <input type="text" id="question_text" name="question_text" required><br><br>
+
+        <label>Options:</label><br>
+        <label for="option1">Option 1:</label>
+        <input type="text" id="option1" name="option1" required><br>
+        <label for="option2">Option 2:</label>
+        <input type="text" id="option2" name="option2" required><br>
+        <label for="option3">Option 3:</label>
+        <input type="text" id="option3" name="option3" required><br>
+        <label for="option4">Option 4:</label>
+        <input type="text" id="option4" name="option4" required><br><br>
+
+        <label for="correct_option">Select Correct Option:</label>
+        <select id="correct_option" name="correct_option" required>
+            <option value="option1">Option 1</option>
+            <option value="option2">Option 2</option>
+            <option value="option3">Option 3</option>
+            <option value="option4">Option 4</option>
+        </select><br><br>
+
+        <button type="submit">Add Question</button>
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#exam_id').on('change', function() {
+                var examId = $(this).val();
+                $.ajax({
+                    type: 'POST',
+                    url: '/get_subjects',
+                    data: {'exam_id': examId},
+                    success: function(data) {
+                        $('#subject_id').empty();
+                        $.each(data, function(index, value) {
+                            $('#subject_id').append($('<option>').text(value.name).attr('value', value.id));
+                        });
+                    }
+                });
+            });
+
+            $('#subject_id').on('change', function() {
+                var subjectId = $(this).val();
+                $.ajax({
+                    type: 'POST',
+                    url: '/get_chapters',
+                    data: {'subject_id': subjectId},
+                    success: function(data) {
+                        $('#chapter_id_question').empty();
+                        $.each(data, function(index, value) {
+                            $('#chapter_id_question').append($('<option>').text(value.name).attr('value', value.id));
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

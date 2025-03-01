@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Access</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle, rgba(10,10,25,1) 10%, rgba(5,5,15,1) 90%);
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .button {
+            background: linear-gradient(45deg, #ff00ff, #6600ff);
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if session['user_id'] %}
+            <h2>Welcome, {{ name }}</h2>
+            <p>Your username: <strong>{{ username }}</strong></p>
+            <button class="button" onclick="location.href='{{ url_for("logout") }}'">Logout</button>
+        {% else %}
+            <h2>Access Your Profile</h2>
+            <p>You need to register before accessing your profile.</p>
+            <button class="button" onclick="location.href='{{ url_for("register") }}'">Register</button>
+        {% endif %}
+    </div>
+</body>
+</html>

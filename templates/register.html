@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle, rgba(10,10,25,1) 10%, rgba(5,5,15,1) 90%);
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        input {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .button {
+            background: linear-gradient(45deg, #ff00ff, #6600ff);
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Register</h2>
+        <form action="{{ url_for('register') }}" method="POST">
+            <input type="text" name="name" placeholder="Enter Your Name" required>
+            <input type="text" name="username" placeholder="Create Username" required>
+            <input type="password" name="password" placeholder="Create Password" required>
+            <button type="submit" class="button">Register</button>
+        </form>
+        <p>Already have an account? <a href="{{ url_for('user_login') }}" style="color: #ff00ff;">Login Here</a></p>
+    </div>
+</body>
+</html>

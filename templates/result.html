@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Result</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle, rgba(10,10,25,1) 10%, rgba(5,5,15,1) 90%);
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .result-container {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff00ff;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .percentage {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-top: 15px;
+        }
+
+        .button-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(45deg, #ff00ff, #6600ff);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .button:hover {
+            background: linear-gradient(45deg, #6600ff, #ff00ff);
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <h1>Quiz Result</h1>
+        <div class="result-item">Total Questions: {{ total_questions }}</div>
+        <div class="result-item">Questions Attempted: {{ total_questions }}</div> <!-- Assuming all questions are attempted -->
+        <div class="result-item">Correct Answers: {{ correct_answers }}</div>
+        <div class="percentage">Percentage Correct: {{ (correct_answers / total_questions * 100) | round(2) }}%</div>
+
+        <div class="button-container">
+            <a href="{{ url_for('home') }}" class="button">Start Again</a>
+            <a href="{{ url_for('user_login') }}" class="button">Login for More Functions</a>
+        </div>
+    </div>
+</body>
+</html>
