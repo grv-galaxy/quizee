@@ -133,13 +133,65 @@
             }
         }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        function updateSelection() {
-            document.getElementById('selectedExam').innerText = document.getElementById('exam').value;
-            document.getElementById('selectedSubject').innerText = document.getElementById('subject').value;
-            document.getElementById('selectedChapter').innerText = document.getElementById('chapter').value;
-            document.getElementById('selectedDuration').innerText = document.getElementById('duration').value + " seconds";
-        }
+        $(document).ready(function() {
+            // Fetch subjects based on selected exam
+            function fetchSubjects(examId) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/get_subjects',
+                    data: {'exam_id': examId},
+                    success: function(data) {
+                        var subjectSelect = $('#subject');
+                        subjectSelect.empty().append('<option value="">Select Subject</option>');
+                        $.each(data, function(index, value) {
+                            subjectSelect.append($('<option>').text(value.name).attr('value', value.name));
+                        });
+                        // Clear chapters when subject changes
+                        fetchChapters('');
+                    }
+                });
+            }
+
+            // Fetch chapters based on selected subject
+            function fetchChapters(subjectName) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/get_chapters',
+                    data: {'subject_name': subjectName},
+                    success: function(data) {
+                        var chapterSelect = $('#chapter');
+                        chapterSelect.empty().append('<option value="">Select Chapter</option>');
+                        $.each(data, function(index, value) {
+                            chapterSelect.append($('<option>').text(value.name).attr('value', value.name));
+                        });
+                    }
+                });
+            }
+
+            // Initial setup and event handlers
+            $('#exam').on('change', function() {
+                var examName = $(this).val();
+                fetchSubjects(examName);
+            });
+
+            $('#subject').on('change', function() {
+                var subjectName = $(this).val();
+                fetchChapters(subjectName);
+            });
+
+            // Update selection display
+            function updateSelection() {
+                document.getElementById('selectedExam').innerText = document.getElementById('exam').value;
+                document.getElementById('selectedSubject').innerText = document.getElementById('subject').value;
+                document.getElementById('selectedChapter').innerText = document.getElementById('chapter').value;
+                document.getElementById('selectedDuration').innerText = document.getElementById('duration').value + " seconds";
+            }
+
+            // Call updateSelection on change of any select
+            $('#exam, #subject, #chapter, #duration').on('change', updateSelection);
+        });
     </script>
 </head>
 <body>
@@ -160,28 +212,22 @@
             <h2>Select Your Quiz</h2>
             <form id="quizForm" class="selection-form" action="/start_quiz" method="POST">
                 <label for="exam">Exam</label>
-                <select id="exam" name="exam" onchange="updateSelection()">
+                <select id="exam" name="exam">
                     <option value="">Select Exam</option>
                     {% for exam in exams %}
                         <option value="{{ exam[1] }}">{{ exam[1] }}</option>
                     {% endfor %}
                 </select>
                 <label for="subject">Subject</label>
-                <select id="subject" name="subject" onchange="updateSelection()">
+                <select id="subject" name="subject">
                     <option value="">Select Subject</option>
-                    {% for subject in subjects %}
-                        <option value="{{ subject[1] }}">{{ subject[1] }} ({{ subject[2] }})</option>
-                    {% endfor %}
                 </select>
                 <label for="chapter">Chapter</label>
-                <select id="chapter" name="chapter" onchange="updateSelection()">
+                <select id="chapter" name="chapter">
                     <option value="">Select Chapter</option>
-                    {% for chapter in chapters %}
-                        <option value="{{ chapter[1] }}">{{ chapter[1] }} ({{ chapter[2] }}, {{ chapter[3] }})</option>
-                    {% endfor %}
                 </select>
                 <label for="duration">Time Per Question (seconds)</label>
-                <select id="duration" name="duration" onchange="updateSelection()">
+                <select id="duration" name="duration">
                     <option value="30">30</option>
                     <option value="60">60</option>
                     <option value="90">90</option>
