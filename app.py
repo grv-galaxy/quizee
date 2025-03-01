@@ -321,6 +321,79 @@ def show_result():
     total_questions = int(request.args.get('total_questions', 1))
     return render_template('result.html', correct_answers=correct_answers, total_questions=total_questions)
 
+from flask import request, redirect, url_for
+
+# Assuming you have a database connection function named `connect_db()`
+
+@app.route('/delete_exam', methods=['POST'])
+def delete_exam():
+    exam_id = request.form['exam_id']
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # Delete subjects and chapters associated with the exam
+    cursor.execute("DELETE FROM subjects WHERE exam_id=?", (exam_id,))
+    cursor.execute("DELETE FROM chapters WHERE subject_id IN (SELECT id FROM subjects WHERE exam_id=?)", (exam_id,))
+    cursor.execute("DELETE FROM questions WHERE chapter_id IN (SELECT id FROM chapters WHERE subject_id IN (SELECT id FROM subjects WHERE exam_id=?))", (exam_id,))
+    
+    # Delete the exam itself
+    cursor.execute("DELETE FROM exams WHERE id=?", (exam_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('admin_page_modification'))
+
+@app.route('/delete_subject', methods=['POST'])
+def delete_subject():
+    subject_id = request.form['subject_id']
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # Delete chapters and questions associated with the subject
+    cursor.execute("DELETE FROM questions WHERE chapter_id IN (SELECT id FROM chapters WHERE subject_id=?)", (subject_id,))
+    cursor.execute("DELETE FROM chapters WHERE subject_id=?", (subject_id,))
+    
+    # Delete the subject itself
+    cursor.execute("DELETE FROM subjects WHERE id=?", (subject_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('admin_page_modification'))
+
+@app.route('/delete_chapter', methods=['POST'])
+def delete_chapter():
+    chapter_id = request.form['chapter_id']
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # Delete questions associated with the chapter
+    cursor.execute("DELETE FROM questions WHERE chapter_id=?", (chapter_id,))
+    
+    # Delete the chapter itself
+    cursor.execute("DELETE FROM chapters WHERE id=?", (chapter_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('admin_page_modification'))
+
+@app.route('/delete_question', methods=['POST'])
+def delete_question():
+    question_id = request.form['question_id']
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # Delete the question itself
+    cursor.execute("DELETE FROM questions WHERE id=?", (question_id,))
+    
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('admin_page_modification'))
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000)) # Get port from environment variable or default to 5000
     app.run(host='0.0.0.0', port=port, debug=False)  # Listen on all public IPs (0.0.0.0)

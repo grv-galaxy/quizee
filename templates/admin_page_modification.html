@@ -82,7 +82,12 @@
     <h3>Available Exams</h3>
     <ul>
         {% for exam in exams %}
-            <li>{{ exam[1] }}</li>
+            <li>{{ exam[1] }}
+                <form style="display: inline;" method="POST" action="/delete_exam">
+                    <input type="hidden" name="exam_id" value="{{ exam[0] }}">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this exam?')">Delete</button>
+                </form>
+            </li>
         {% endfor %}
     </ul>
 
@@ -104,7 +109,12 @@
     <h3>Available Subjects</h3>
     <ul>
         {% for subject in subjects %}
-            <li>{{ subject[1] }} (Exam: {{ subject[2] }})</li>
+            <li>{{ subject[1] }} (Exam: {{ subject[2] }})
+                <form style="display: inline;" method="POST" action="/delete_subject">
+                    <input type="hidden" name="subject_id" value="{{ subject[0] }}">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this subject?')">Delete</button>
+                </form>
+            </li>
         {% endfor %}
     </ul>
 
@@ -126,7 +136,12 @@
     <h3>Available Chapters</h3>
     <ul>
         {% for chapter in chapters %}
-            <li>{{ chapter[1] }} (Subject: {{ chapter[2] }})</li>
+            <li>{{ chapter[1] }} (Subject: {{ chapter[2] }})
+                <form style="display: inline;" method="POST" action="/delete_chapter">
+                    <input type="hidden" name="chapter_id" value="{{ chapter[0] }}">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this chapter?')">Delete</button>
+                </form>
+            </li>
         {% endfor %}
     </ul>
 
@@ -163,6 +178,18 @@
 
         <button type="submit">Add Question</button>
     </form>
+
+    <h3>Available Questions</h3>
+    <ul>
+        {% for question in questions %}
+            <li>{{ question[1] }} (Chapter: {{ question[2] }})
+                <form style="display: inline;" method="POST" action="/delete_question">
+                    <input type="hidden" name="question_id" value="{{ question[0] }}">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete this question?')">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
