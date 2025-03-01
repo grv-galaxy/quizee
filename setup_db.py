@@ -53,12 +53,10 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS scores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     exam_id INTEGER NOT NULL,
-    subject_id INTEGER NOT NULL,
     chapter_id INTEGER NOT NULL,
     score INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (exam_id) REFERENCES exams (id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE CASCADE,
     FOREIGN KEY (chapter_id) REFERENCES chapters (id) ON DELETE CASCADE
 )''')
 

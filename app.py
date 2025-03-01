@@ -392,7 +392,22 @@ def delete_question():
     conn.close()
     
     return redirect(url_for('admin_page_modification'))
-
+@app.route('/user_details')
+def user_details():
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # Fetch user details
+    cursor.execute("SELECT * FROM users")
+    users = cursor.fetchall()
+    
+    # Fetch quiz results
+    cursor.execute("SELECT u.name, e.name AS exam_name, c.name AS chapter_name, s.score FROM scores s JOIN users u ON s.user_id = u.id JOIN exams e ON s.exam_id = e.id JOIN chapters c ON s.chapter_id = c.id")
+    quiz_results = cursor.fetchall()
+    
+    conn.close()
+    
+    return render_template('user_details.html', users=users, quiz_results=quiz_results)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000)) # Get port from environment variable or default to 5000
