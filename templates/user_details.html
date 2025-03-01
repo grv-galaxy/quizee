@@ -41,21 +41,21 @@
     </table>
     
     <h2>Quiz Results</h2>
-    <table>
+<table>
+    <tr>
+        <th>User Name</th>
+        <th>Exam Name</th>
+        <th>Chapter Name</th>
+        <th>Score</th>
+    </tr>
+    {% for result in quiz_results %}
         <tr>
-            <th>User Name</th>
-            <th>Exam Name</th>
-            <th>Chapter Name</th>
-            <th>Score</th>
+            <td>{{ result[0] }}</td>
+            <td>{{ result[1] }}</td>
+            <td>{{ result[2] }}</td>
+            <td>{{ result[3] }}</td>
         </tr>
-        {% for result in quiz_results %}
-            <tr>
-                <td>{{ result[0] }}</td>
-                <td>{{ result[1] }}</td>
-                <td>{{ result[2] }}</td>
-                <td>{{ result[3] }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+    {% endfor %}
+</table>
 </body>
 </html>

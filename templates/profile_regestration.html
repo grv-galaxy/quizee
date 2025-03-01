@@ -24,6 +24,8 @@
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
             text-align: center;
+            width: 80%;
+            margin-bottom: 20px;
         }
 
         .button {
@@ -41,6 +43,41 @@
             transform: scale(1.1);
             box-shadow: 0 0 15px rgba(255, 0, 255, 1);
         }
+
+        table {
+            width: 100%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            color: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            color: black;
+        }
+
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            width: 80%;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .info-container {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -55,5 +92,55 @@
             <button class="button" onclick="location.href='{{ url_for("register") }}'">Register</button>
         {% endif %}
     </div>
+    
+    {% if session['user_id'] %}
+        <div class="info-container">
+            <h3>Previous Scores:</h3>
+            <table>
+                <tr>
+                    <th>Exam</th>
+                    <th>Subject</th>
+                    <th>Chapter</th>
+                    <th>Score</th>
+                </tr>
+                {% for score in scores %}
+                    <tr>
+                        <td>{{ score[0] }}</td>
+                        <td>{{ score[1] }}</td>
+                        <td>{{ score[2] }}</td>
+                        <td>{{ score[3] }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            
+            <h3>Chapter Remarks:</h3>
+            <table>
+                <tr>
+                    <th>Chapter</th>
+                    <th>Average Score</th>
+                    <th>Remark</th>
+                </tr>
+                {% for remark in chapter_remarks %}
+                    {% if remark[1] > 80 %}
+                        <tr style="background-color: lightgreen;">
+                    {% elif remark[1] > 60 %}
+                        <tr style="background-color: yellow;">
+                    {% else %}
+                        <tr style="background-color: lightcoral;">
+                    {% endif %}
+                        <td>{{ remark[0] }}</td>
+                        <td>{{ remark[1] }}</td>
+                        {% if remark[1] > 80 %}
+                            <td>Excellent</td>
+                        {% elif remark[1] > 60 %}
+                            <td>Good</td>
+                        {% else %}
+                            <td>Needs Improvement</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
 </body>
 </html>

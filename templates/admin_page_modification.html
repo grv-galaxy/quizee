@@ -30,7 +30,8 @@
         }
 
         input[type="text"],
-        select {
+        select,
+        textarea {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
@@ -60,7 +61,100 @@
         li {
             margin-bottom: 5px;
         }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            form {
+                padding: 15px;
+            }
+            input[type="text"],
+            select,
+            textarea {
+                width: 100%;
+            }
+        }
+
+        /* Simplified Delete Buttons */
+        .delete-button {
+            background-color: #d9534f;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .delete-button:hover {
+            background-color: #c9302c;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Function to fetch subjects based on selected exam
+            function fetchSubjects(examId) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/get_subjects',
+                    data: {'exam_id': examId},
+                    success: function(data) {
+                        var subjectSelect = $('#subject_id');
+                        subjectSelect.empty().append('<option value="">Select Subject</option>');
+                        $.each(data, function(index, value) {
+                            subjectSelect.append($('<option>').text(value.name).attr('value', value.id));
+                        });
+                        // Clear chapters when subject changes
+                        fetchChapters('');
+                    }
+                });
+            }
+
+            // Function to fetch chapters based on selected subject
+            function fetchChapters(subjectId) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/get_chapters',
+                    data: {'subject_id': subjectId},
+                    success: function(data) {
+                        var chapterSelect = $('#chapter_id_question');
+                        chapterSelect.empty().append('<option value="">Select Chapter</option>');
+                        $.each(data, function(index, value) {
+                            chapterSelect.append($('<option>').text(value.name).attr('value', value.id));
+                        });
+                    }
+                });
+            }
+
+            // Initial setup and event handlers
+            $('#exam_id').on('change', function() {
+                var examId = $(this).val();
+                fetchSubjects(examId);
+            });
+
+            $('#subject_id').on('change', function() {
+                var subjectId = $(this).val();
+                fetchChapters(subjectId);
+            });
+
+            // Function to clear all dropdowns
+            function clearAllDropdowns() {
+                $('#exam_id').val('');
+                $('#subject_id').empty().append('<option value="">Select Subject</option>');
+                $('#chapter_id_question').empty().append('<option value="">Select Chapter</option>');
+            }
+
+            // Attach clearAllDropdowns to the page if needed
+            window.clearAllDropdowns = clearAllDropdowns;
+        });
+    </script>
 </head>
 <body>
     <a href="{{ url_for('user_details') }}">View User Details</a>
@@ -73,158 +167,134 @@
     <h2>Modify Database</h2>
 
     <!-- Add Exam -->
-    <form method="POST" action="/add_exam">
-        <h3>Add Exam</h3>
-        <label for="exam_name">Exam Name:</label>
-        <input type="text" id="exam_name" name="exam_name" required><br><br>
-        <button type="submit">Add Exam</button>
-    </form>
+    <div class="form-section">
+        <form method="POST" action="/add_exam">
+            <h3>Add Exam</h3>
+            <label for="exam_name">Exam Name:</label>
+            <input type="text" id="exam_name" name="exam_name" required><br><br>
+            <button type="submit">Add Exam</button>
+        </form>
 
-    <h3>Available Exams</h3>
-    <ul>
-        {% for exam in exams %}
-            <li>{{ exam[1] }}
-                <form style="display: inline;" method="POST" action="/delete_exam">
-                    <input type="hidden" name="exam_id" value="{{ exam[0] }}">
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete this exam?')">Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
+        <h3>Available Exams</h3>
+        <ul>
+            {% for exam in exams %}
+                <li>{{ exam[1] }}
+                    <form style="display: inline;" method="POST" action="/delete_exam">
+                        <input type="hidden" name="exam_id" value="{{ exam[0] }}">
+                        <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this exam?')">Delete</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 
     <!-- Add Subject -->
-    <form method="POST" action="/add_subject">
-        <h3>Add Subject</h3>
-        <label for="exam_id">Select Exam:</label>
-        <select id="exam_id" name="exam_id" required>
-            {% for exam in exams %}
-                <option value="{{ exam[0] }}">{{ exam[1] }}</option>
+    <div class="form-section">
+        <form method="POST" action="/add_subject">
+            <h3>Add Subject</h3>
+            <label for="exam_id">Select Exam:</label>
+            <select id="exam_id" name="exam_id" required>
+                <option value="">Select Exam</option>
+                {% for exam in exams %}
+                    <option value="{{ exam[0] }}">{{ exam[1] }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label for="subject_name">Subject Name:</label>
+            <input type="text" id="subject_name" name="subject_name" required><br><br>
+            <button type="submit">Add Subject</button>
+        </form>
+
+        <h3>Available Subjects</h3>
+        <ul>
+            {% for subject in subjects %}
+                <li>{{ subject[1] }} (Exam: {{ subject[2] }})
+                    <form style="display: inline;" method="POST" action="/delete_subject">
+                        <input type="hidden" name="subject_id" value="{{ subject[0] }}">
+                        <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this subject?')">Delete</button>
+                    </form>
+                </li>
             {% endfor %}
-        </select><br><br>
-
-        <label for="subject_name">Subject Name:</label>
-        <input type="text" id="subject_name" name="subject_name" required><br><br>
-        <button type="submit">Add Subject</button>
-    </form>
-
-    <h3>Available Subjects</h3>
-    <ul>
-        {% for subject in subjects %}
-            <li>{{ subject[1] }} (Exam: {{ subject[2] }})
-                <form style="display: inline;" method="POST" action="/delete_subject">
-                    <input type="hidden" name="subject_id" value="{{ subject[0] }}">
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete this subject?')">Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
+        </ul>
+    </div>
 
     <!-- Add Chapter -->
-    <form method="POST" action="/add_chapter">
-        <h3>Add Chapter</h3>
-        <label for="subject_id">Select Subject:</label>
-        <select id="subject_id" name="subject_id" required>
-            {% for subject in subjects %}
-                <option value="{{ subject[0] }}">{{ subject[1] }} (Exam: {{ subject[2] }})</option>
+    <div class="form-section">
+        <form method="POST" action="/add_chapter">
+            <h3>Add Chapter</h3>
+            <label for="subject_id">Select Subject:</label>
+            <select id="subject_id" name="subject_id" required>
+                <option value="">Select Subject</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject[0] }}">{{ subject[1] }} (Exam: {{ subject[2] }})</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label for="chapter_name">Chapter Name:</label>
+            <input type="text" id="chapter_name" name="chapter_name" required><br><br>
+            <button type="submit">Add Chapter</button>
+        </form>
+
+        <h3>Available Chapters</h3>
+        <ul>
+            {% for chapter in chapters %}
+                <li>{{ chapter[1] }} (Subject: {{ chapter[2] }})
+                    <form style="display: inline;" method="POST" action="/delete_chapter">
+                        <input type="hidden" name="chapter_id" value="{{ chapter[0] }}">
+                        <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this chapter?')">Delete</button>
+                    </form>
+                </li>
             {% endfor %}
-        </select><br><br>
-
-        <label for="chapter_name">Chapter Name:</label>
-        <input type="text" id="chapter_name" name="chapter_name" required><br><br>
-        <button type="submit">Add Chapter</button>
-    </form>
-
-    <h3>Available Chapters</h3>
-    <ul>
-        {% for chapter in chapters %}
-            <li>{{ chapter[1] }} (Subject: {{ chapter[2] }})
-                <form style="display: inline;" method="POST" action="/delete_chapter">
-                    <input type="hidden" name="chapter_id" value="{{ chapter[0] }}">
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete this chapter?')">Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
+        </ul>
+    </div>
 
     <!-- Add Question -->
-    <form method="POST" action="/add_question">
-        <h3>Add Question</h3>
-        <label for="chapter_id_question">Select Chapter:</label>
-        <select id="chapter_id_question" name="chapter_id_question" required>
-            {% for chapter in chapters %}
-                <option value="{{ chapter[0] }}">{{ chapter[1] }} (Subject: {{ chapter[2] }})</option>
+    <div class="form-section">
+        <form method="POST" action="/add_question">
+            <h3>Add Question</h3>
+            <label for="chapter_id_question">Select Chapter:</label>
+            <select id="chapter_id_question" name="chapter_id_question" required>
+                <option value="">Select Chapter</option>
+                {% for chapter in chapters %}
+                    <option value="{{ chapter[0] }}">{{ chapter[1] }} (Subject: {{ chapter[2] }})</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label for="question_text">Question Text:</label>
+            <textarea id="question_text" name="question_text" rows="4" required></textarea><br><br>
+
+            <label>Options:</label><br>
+            <label for="option1">Option 1:</label>
+            <input type="text" id="option1" name="option1" required><br>
+            <label for="option2">Option 2:</label>
+            <input type="text" id="option2" name="option2" required><br>
+            <label for="option3">Option 3:</label>
+            <input type="text" id="option3" name="option3" required><br>
+            <label for="option4">Option 4:</label>
+            <input type="text" id="option4" name="option4" required><br><br>
+
+            <label for="correct_option">Select Correct Option:</label>
+            <select id="correct_option" name="correct_option" required>
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+                <option value="option3">Option 3</option>
+                <option value="option4">Option 4</option>
+            </select><br><br>
+
+            <button type="submit">Add Question</button>
+        </form>
+
+        <h3>Available Questions</h3>
+        <ul>
+            {% for question in questions %}
+                <li>{{ question[1] }} (Chapter: {{ question[2] }})
+                    <form style="display: inline;" method="POST" action="/delete_question">
+                        <input type="hidden" name="question_id" value="{{ question[0] }}">
+                        <button type="submit" class="delete-button" onclick="return confirm('Are you sure you want to delete this question?')">Delete</button>
+                    </form>
+                </li>
             {% endfor %}
-        </select><br><br>
-
-        <label for="question_text">Question Text:</label>
-        <input type="text" id="question_text" name="question_text" required><br><br>
-
-        <label>Options:</label><br>
-        <label for="option1">Option 1:</label>
-        <input type="text" id="option1" name="option1" required><br>
-        <label for="option2">Option 2:</label>
-        <input type="text" id="option2" name="option2" required><br>
-        <label for="option3">Option 3:</label>
-        <input type="text" id="option3" name="option3" required><br>
-        <label for="option4">Option 4:</label>
-        <input type="text" id="option4" name="option4" required><br><br>
-
-        <label for="correct_option">Select Correct Option:</label>
-        <select id="correct_option" name="correct_option" required>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
-            <option value="option4">Option 4</option>
-        </select><br><br>
-
-        <button type="submit">Add Question</button>
-    </form>
-
-    <h3>Available Questions</h3>
-    <ul>
-        {% for question in questions %}
-            <li>{{ question[1] }} (Chapter: {{ question[2] }})
-                <form style="display: inline;" method="POST" action="/delete_question">
-                    <input type="hidden" name="question_id" value="{{ question[0] }}">
-                    <button type="submit" onclick="return confirm('Are you sure you want to delete this question?')">Delete</button>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#exam_id').on('change', function() {
-                var examId = $(this).val();
-                $.ajax({
-                    type: 'POST',
-                    url: '/get_subjects',
-                    data: {'exam_id': examId},
-                    success: function(data) {
-                        $('#subject_id').empty();
-                        $.each(data, function(index, value) {
-                            $('#subject_id').append($('<option>').text(value.name).attr('value', value.id));
-                        });
-                    }
-                });
-            });
-
-            $('#subject_id').on('change', function() {
-                var subjectId = $(this).val();
-                $.ajax({
-                    type: 'POST',
-                    url: '/get_chapters',
-                    data: {'subject_id': subjectId},
-                    success: function(data) {
-                        $('#chapter_id_question').empty();
-                        $.each(data, function(index, value) {
-                            $('#chapter_id_question').append($('<option>').text(value.name).attr('value', value.id));
-                        });
-                    }
-                });
-            });
-        });
-    </script>
+        </ul>
+    </div>
 </body>
 </html>

@@ -63,7 +63,38 @@ def logout():
 def profile():
     if 'user_id' not in session:
         return redirect(url_for('user_login'))
-    return render_template('profile_regestration.html', name=session['name'])
+    
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    # Fetch user details
+    cursor.execute("SELECT name, username FROM users WHERE id=?", (session['user_id'],))
+    user_details = cursor.fetchone()
+    
+    # Fetch all scores for the user
+    cursor.execute("""
+        SELECT e.name AS exam_name, s.name AS subject_name, c.name AS chapter_name, sc.score
+        FROM scores sc
+        JOIN exams e ON sc.exam_id = e.id
+        JOIN chapters c ON sc.chapter_id = c.id
+        JOIN subjects s ON c.subject_id = s.id
+        WHERE sc.user_id = ?
+    """, (session['user_id'],))
+    scores = cursor.fetchall()
+    
+    # Fetch chapter remarks (example logic)
+    cursor.execute("""
+        SELECT c.name, AVG(sc.score) AS avg_score
+        FROM scores sc
+        JOIN chapters c ON sc.chapter_id = c.id
+        WHERE sc.user_id = ?
+        GROUP BY c.name
+    """, (session['user_id'],))
+    chapter_remarks = cursor.fetchall()
+    
+    conn.close()
+    
+    return render_template('profile_regestration.html', name=user_details[0], username=user_details[1], scores=scores, chapter_remarks=chapter_remarks)
 
 # ---------------- ADMIN AUTHENTICATION ----------------
 ADMIN_ID = "GauravKumar@123"
@@ -393,22 +424,51 @@ def delete_question():
     conn.close()
     
     return redirect(url_for('admin_page_modification'))
-@app.route('/user_details')
+
+@app.route('/user_details', methods=['GET'])
 def user_details():
     conn = connect_db()
     cursor = conn.cursor()
     
-    # Fetch user details
-    cursor.execute("SELECT * FROM users")
+    # Fetch all users
+    cursor.execute("SELECT id, name, username FROM users")
     users = cursor.fetchall()
     
     # Fetch quiz results
-    cursor.execute("SELECT u.name, e.name AS exam_name, c.name AS chapter_name, s.score FROM scores s JOIN users u ON s.user_id = u.id JOIN exams e ON s.exam_id = e.id JOIN chapters c ON s.chapter_id = c.id")
+    cursor.execute("""
+        SELECT u.username, e.name AS exam_name, s.name AS subject_name, c.name AS chapter_name, sc.score
+        FROM scores sc
+        JOIN users u ON sc.user_id = u.id
+        JOIN exams e ON sc.exam_id = e.id
+        JOIN chapters c ON sc.chapter_id = c.id
+        JOIN subjects s ON c.subject_id = s.id
+    """)
     quiz_results = cursor.fetchall()
     
     conn.close()
     
     return render_template('user_details.html', users=users, quiz_results=quiz_results)
+
+@app.route('/store_score', methods=['POST'])
+def store_score():
+    user_id = request.form['user_id']
+    exam_id = request.form['exam_id']
+    chapter_id = request.form['chapter_id']
+    score = request.form['score']
+    
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("INSERT INTO scores (user_id, exam_id, chapter_id, score) VALUES (?, ?, ?, ?)", (user_id, exam_id, chapter_id, score))
+        conn.commit()
+        return "Score stored successfully."
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e.args[0]}")
+        return "Failed to store score."
+    finally:
+        conn.close()
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000)) # Get port from environment variable or default to 5000

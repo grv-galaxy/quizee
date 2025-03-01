@@ -24,7 +24,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS subjects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     exam_id INTEGER NOT NULL,
-    FOREIGN KEY (exam_id) REFERENCES exams (id) ON DELETE CASCADE
+    FOREIGN KEY (exam_id) REFERENCES exams (id) ON DELETE RESTRICT
 )''')
 
 # Create chapters table
@@ -32,7 +32,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS chapters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     subject_id INTEGER NOT NULL,
-    FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE CASCADE
+    FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE RESTRICT
 )''')
 
 # Create questions table
@@ -45,7 +45,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS questions (
     option4 TEXT NOT NULL,
     correct_option TEXT NOT NULL,
     chapter_id INTEGER NOT NULL,
-    FOREIGN KEY (chapter_id) REFERENCES chapters (id) ON DELETE CASCADE
+    FOREIGN KEY (chapter_id) REFERENCES chapters (id) ON DELETE RESTRICT
 )''')
 
 # Create scores table
@@ -55,9 +55,9 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS scores (
     exam_id INTEGER NOT NULL,
     chapter_id INTEGER NOT NULL,
     score INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (exam_id) REFERENCES exams (id) ON DELETE CASCADE,
-    FOREIGN KEY (chapter_id) REFERENCES chapters (id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
+    FOREIGN KEY (exam_id) REFERENCES exams (id) ON DELETE RESTRICT,
+    FOREIGN KEY (chapter_id) REFERENCES chapters (id) ON DELETE RESTRICT
 )''')
 
 conn.commit()
